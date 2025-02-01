@@ -1,0 +1,189 @@
+{
+  "name": "main workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1AGD10ANvOcskG_fLYRuWScWGzzTkUFYYrz26fSaw2Eg",
+          "mode": "list",
+          "cachedResultName": "nansen token",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AGD10ANvOcskG_fLYRuWScWGzzTkUFYYrz26fSaw2Eg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AGD10ANvOcskG_fLYRuWScWGzzTkUFYYrz26fSaw2Eg/edit#gid=0"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRange",
+              "headerRow": 2,
+              "firstDataRow": 3
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -140,
+        -140
+      ],
+      "id": "dac85c0f-577b-43e0-b47e-05fd6db2f47e",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "geSu5ec9s8wMDVl6",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"tweetContent\": \"🚀 Trending Crypto Alert! \\n🔹 Token: {{$json['Token']}}\\n📈 Price: ${{$json['Price']}}\\n📊 Volume: ${{$json['Volume']}}}\"\n}",
+        "includeOtherFields": "={{ true }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        -120
+      ],
+      "id": "e6b954b1-5e8b-47f8-88de-25f1522fc894",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "text": "={{$json[\"generations\"][0][\"text\"]}}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -140
+      ],
+      "id": "7e8041c2-0a24-4391-81bb-b4074bc8691c",
+      "name": "X",
+      "executeOnce": false,
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "HR8ObKyNv2MkLzGa",
+          "name": "X account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cohere.ai/v1/generate",
+        "sendHeaders": true,
+        "specifyHeaders": "=json",
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer 2zOPFznysQ1wOgb2W7cXpSe0z386aqvHYw7xFDvz\",\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"command-r-plus\",\n  \"prompt\": \"Generate an AI-driven market insight for the cryptocurrency token: {{$json[\"Token\"]}} with a price of {{$json[\"Price\"]}} and market cap of {{$json[\"Volume\"]}}.\",\n  \"max_tokens\": 50\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        340,
+        -140
+      ],
+      "id": "9f656537-03c9-4692-aaa8-5bcc83f6a633",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -380,
+        -140
+      ],
+      "id": "f5d21488-720e-42d0-98d7-997fc2e1d306",
+      "name": "Schedule Trigger",
+      "notesInFlow": true,
+      "notes": "abc"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "X",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2e750610-5e58-493a-a591-5480f14adf47",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "efa5793994bba8abdead9ae7cb7899898ff098e6c454cb964a1a78ede2a83ab6"
+  },
+  "id": "3EIk63uz1JXLjUQz",
+  "tags": []
+}
